@@ -213,6 +213,7 @@ console.log("✅ Tables created\n");
 
 // Set up Better Auth for password hashing
 const auth = betterAuth({
+  secret: process.env.BETTER_AUTH_SECRET ?? "overclock-dev-secret-local-only",
   database: drizzleAdapter(db, { provider: "sqlite" }),
   emailAndPassword: { enabled: true },
   trustedOrigins: ["http://localhost:3000"],
