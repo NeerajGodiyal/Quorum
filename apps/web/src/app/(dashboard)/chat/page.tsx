@@ -58,7 +58,7 @@ export default function ChatPage() {
   useEffect(() => {
     if (!socket) return;
     const onMsg = (msg: Message) => {
-      if (msg.channelId === active?.id) {
+      if (msg.channelId === active?.id && msg.userId !== session?.user?.id) {
         setMessages((p) => [...p, msg]);
         setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
       }
@@ -78,7 +78,11 @@ export default function ChatPage() {
     const content = input.trim();
     setInput("");
     const msg = await sendMessage(active.id, session.user.id, content);
-    socket?.emit("chat:message", { ...msg, channelId: active.id, userName: session.user.name });
+    // Add to local messages immediately
+    const newMsg = { ...msg, userName: session.user.name, channelId: active.id } as Message;
+    setMessages((prev) => [...prev, newMsg]);
+    setTimeout(() => endRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+    socket?.emit("chat:message", { ...newMsg });
   };
 
   const onInput = (v: string) => {

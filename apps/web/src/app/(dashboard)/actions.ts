@@ -47,12 +47,30 @@ export async function getRecentActivity() {
     .orderBy(desc(pins.createdAt))
     .limit(2);
 
+  // Get recent plans
+  const recentPlans = await db
+    .select({ id: plans.id, title: plans.title, mode: plans.mode, createdAt: plans.createdAt, userName: user.name })
+    .from(plans)
+    .leftJoin(user, eq(plans.createdBy, user.id))
+    .orderBy(desc(plans.createdAt))
+    .limit(2);
+
+  // Get recent projects
+  const recentProjects = await db
+    .select({ id: projects.id, title: projects.title, createdAt: projects.createdAt, userName: user.name })
+    .from(projects)
+    .leftJoin(user, eq(projects.createdBy, user.id))
+    .orderBy(desc(projects.createdAt))
+    .limit(2);
+
   // Combine and sort
   const items = [
     ...recentTasks.map((t) => ({ type: "task" as const, text: `${t.userName} created a task`, target: t.title, href: `/tasks/${t.id}`, time: t.createdAt })),
     ...recentMessages.map((m) => ({ type: "message" as const, text: `${m.userName} messaged`, target: `in chat`, href: `/chat`, time: m.createdAt })),
     ...recentPins.map((p) => ({ type: "pin" as const, text: `${p.userName} pinned`, target: p.title, href: `/research/${p.id}`, time: p.createdAt })),
-  ].sort((a, b) => (b.time?.getTime() ?? 0) - (a.time?.getTime() ?? 0)).slice(0, 6);
+    ...recentPlans.map((p) => ({ type: "plan" as const, text: `${p.userName} updated`, target: p.title, href: `/planning/${p.id}`, time: p.createdAt })),
+    ...recentProjects.map((p) => ({ type: "project" as const, text: `${p.userName} created project`, target: p.title, href: `/projects/${p.id}`, time: p.createdAt })),
+  ].sort((a, b) => (b.time?.getTime() ?? 0) - (a.time?.getTime() ?? 0)).slice(0, 8);
 
   return items;
 }

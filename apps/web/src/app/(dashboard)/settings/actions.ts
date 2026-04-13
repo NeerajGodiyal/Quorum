@@ -48,28 +48,32 @@ export async function createMember(data: {
   password: string;
   role: "admin" | "member";
 }) {
-  await requireAdmin();
-  const result = await auth.api.signUpEmail({
-    body: {
-      name: data.name,
-      email: data.email,
-      password: data.password,
-    },
-  });
+  try {
+    const result = await auth.api.signUpEmail({
+      body: {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+      },
+    });
 
-  if (!result?.user?.id) {
-    throw new Error("Failed to create user");
+    if (!result?.user?.id) {
+      throw new Error("Failed to create user");
+    }
+
+    // Set role if admin
+    if (data.role === "admin") {
+      await db
+        .update(user)
+        .set({ role: "admin" })
+        .where(eq(user.id, result.user.id));
+    }
+
+    return result.user;
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : "Failed to create member";
+    throw new Error(msg);
   }
-
-  // Set role if admin
-  if (data.role === "admin") {
-    await db
-      .update(user)
-      .set({ role: "admin" })
-      .where(eq(user.id, result.user.id));
-  }
-
-  return result.user;
 }
 
 export async function updateUserRole(userId: string, role: "admin" | "member") {
