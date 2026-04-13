@@ -1,0 +1,21 @@
+{
+  "name": "overclock",
+  "private": true,
+  "scripts": {
+    "dev": "tsx scripts/dev.ts",
+    "dev:web": "pnpm --filter @oc/web dev",
+    "dev:socket": "pnpm --filter @oc/socket-server dev",
+    "db:generate": "pnpm --filter @oc/db generate",
+    "db:migrate": "pnpm --filter @oc/db migrate",
+    "db:seed": "tsx scripts/seed.ts"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0",
+    "concurrently": "^9.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@9.15.0"
+}
